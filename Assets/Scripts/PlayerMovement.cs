@@ -5,8 +5,8 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
 
-    public CharacterController2D controller;
-    public Animator animator;
+    private CharacterController2D controller;
+    private Animator animator;
 
     private float runSpeed = 20f;
 
@@ -16,6 +16,12 @@ public class PlayerMovement : MonoBehaviour
 
     private float crouchToRunTimer = 0f;
     private bool crouchToRunTimerStart = false;
+
+    void Start()
+    {
+        controller = GetComponent<CharacterController2D>();
+        animator = GetComponent<Animator>();
+    }
 
     // Update is called once per frame
     void Update()
@@ -27,6 +33,7 @@ public class PlayerMovement : MonoBehaviour
 
         // If shift is held down, player will speed will increase to 40f 
         // TODO: Add comments here explaining this or refactor to make it more readable
+        // Logic works but play testing is required
         if (Input.GetButton("Run"))
         {
             runSpeed = 40f;
