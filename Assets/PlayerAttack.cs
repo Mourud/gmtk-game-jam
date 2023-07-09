@@ -15,6 +15,10 @@ public class PlayerAttack : MonoBehaviour
         lineRenderer.positionCount = 2; // Start and end points
         lineRenderer.startWidth = 0.05f;
         lineRenderer.endWidth = 0.05f;
+        lineRenderer.startColor = Color.white; // Set the start color to white
+        lineRenderer.endColor = Color.white; // Set the end color to white
+        lineRenderer.textureMode = LineTextureMode.Tile; // Enable tiling of the material texture
+
     }
 
     // Update is called once per frame
@@ -48,11 +52,12 @@ public class PlayerAttack : MonoBehaviour
             }
             if (isAiming)
             {
+                lineRenderer.positionCount = 0;
                 animator.SetBool("GunAim", false);
                 animator.SetTrigger("GunShoot");
                 isAiming = false;
             }
-            //animator.SetTrigger("GunShoot");
+            animator.SetTrigger("GunShoot");
         }
 
 
@@ -71,43 +76,47 @@ public class PlayerAttack : MonoBehaviour
         // Calculate the rotation needed to point the object at the target
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
+
+
         // Apply the rotation to the object
+        angle = Mathf.Clamp(angle, -50, 90);
         arm.rotation = Quaternion.Euler(0, 0, angle);
-        Vector3 mousePosition = Input.mousePosition;
-        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
 
         DrawTrajectory();
-
-
 
     }
     void DrawTrajectory()
     {
+        lineRenderer.positionCount = 2;
         Vector3 mousePosition = Input.mousePosition;
 
         Vector3 worldMousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
-        worldMousePosition.z = 0; // For 2D, we force z position to be 0
 
 
         Vector3 gunPosition = lineRenderer.transform.position;
         gunPosition.z = 0; // For 2D, we force z position to be 0
-
         // Calculate direction from gun to mouse position
         Vector3 direction = worldMousePosition - gunPosition;
 
-        RaycastHit2D hit = Physics2D.Raycast(gunPosition, direction);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        if (hit.collider != null)
-        {
-            // If raycast hits something, set end point to hit point
-            lineRenderer.SetPosition(0, gunPosition);
-            lineRenderer.SetPosition(1, hit.point);
-        }
-        else
-        {
+        // Restrict angle to be between -50 and 90 degrees
+        angle = Mathf.Clamp(angle, -50, 90);
+        direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+
+        // RaycastHit2D hit = Physics2D.Raycast(gunPosition, direction);
+
+        // if (hit.collider != null)
+        // {
+        //     // If raycast hits something, set end point to hit point
+        //     lineRenderer.SetPosition(0, gunPosition);
+        //     lineRenderer.SetPosition(1, hit.point);
+        // }
+        // else
+        // {
             // If raycast hits nothing, draw line towards mouse position
             lineRenderer.SetPosition(0, gunPosition);
-            lineRenderer.SetPosition(1, gunPosition + direction.normalized * 1000); // Line length when nothing is hit
-        }
+            lineRenderer.SetPosition(1, gunPosition + direction.normalized *0.5f); // Line length when nothing is hit
+        // }
     }
 }
