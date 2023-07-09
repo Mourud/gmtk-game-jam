@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Speed", Mathf.Abs(horizontalMove));
 
         // If shift is held down, player will speed will increase to 40f 
+        // TODO: Add comments here explaining this or refactor to make it more readable
         if (Input.GetButton("Run"))
         {
             runSpeed = 40f;
@@ -76,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
     public void OnLanding()
     {
         animator.SetBool("IsJumping", false);
+        crouch = false;
     }
 
     public void OnCrouching(bool isCrouching)
