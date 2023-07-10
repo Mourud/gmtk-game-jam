@@ -6,84 +6,77 @@ using System.Linq;
 public class PlayerAttack : MonoBehaviour
 {
     public LineRenderer lineRenderer;
-    bool isAiming = false;
     private Animator animator;
+
+    private SpriteRenderer[] childRenderers;
+
+    private SpriteRenderer selfSpriteRenderer;
+
+    private PlayerMovement playerMovementScript;
+
+    private Transform armTransform;
+
     // Start is called before the first frame update
     void Start()
     {
-        animator = gameObject.GetComponent<Animator>();
-        lineRenderer.positionCount = 2; // Start and end points
-        lineRenderer.startWidth = 0.05f;
-        lineRenderer.endWidth = 0.05f;
-        lineRenderer.startColor = Color.white; // Set the start color to white
-        lineRenderer.endColor = Color.white; // Set the end color to white
-        lineRenderer.textureMode = LineTextureMode.Tile; // Enable tiling of the material texture
+        animator = GetComponent<Animator>();
+        childRenderers = GetComponentsInChildren<SpriteRenderer>().Where(x => x.gameObject != gameObject).ToArray();
+        selfSpriteRenderer = GetComponent<SpriteRenderer>();
+        armTransform = transform.Find("Arm");
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        SpriteRenderer[] renderers = gameObject.GetComponentsInChildren<SpriteRenderer>().Where(x => x.gameObject != gameObject).ToArray();
-        if (Input.GetButton("Fire1") && (animator.GetCurrentAnimatorStateInfo(0).IsName("Idle") || animator.GetCurrentAnimatorStateInfo(0).IsName("GunFireArmlessAim")))
+        if (Input.GetButton("Fire1"))
         {
-
-            isAiming = true;
-            gameObject.GetComponent<SpriteRenderer>().enabled = false;
-            foreach (SpriteRenderer renderer in renderers)
+            playerMovementScript.enabled = false;
+            selfSpriteRenderer.enabled = false;
+            foreach (SpriteRenderer renderer in childRenderers)
             {
                 renderer.enabled = true;
             }
-            // Set animation trigger
-            animator.SetBool("GunAim", true);
-            gameObject.GetComponent<PlayerMovement>().enabled = false;
             AimAtMouse();
-
-
+            StartRaycast();
+            OnGunFire();
         }
-        else if (Input.GetButtonUp("Fire1"))
+
+    }
+
+    private void OnGunFire()
+    {
+        playerMovementScript.enabled = true;
+        selfSpriteRenderer.enabled = true;
+        foreach (SpriteRenderer renderer in childRenderers)
         {
-            gameObject.GetComponent<PlayerMovement>().enabled = true;
-            // Shoot gun
-            gameObject.GetComponent<SpriteRenderer>().enabled = true;
-            foreach (SpriteRenderer renderer in renderers)
-            {
-                renderer.enabled = false;
-            }
-            if (isAiming)
-            {
-                lineRenderer.positionCount = 0;
-                animator.SetBool("GunAim", false);
-                animator.SetTrigger("GunShoot");
-                isAiming = false;
-            }
-            animator.SetTrigger("GunShoot");
+            renderer.enabled = false;
         }
-
-
     }
 
     private void AimAtMouse()
     {
-        Transform arm = gameObject.transform.Find("Arm");
-        GameObject attachedGameObject = arm.gameObject;
-        Vector2 spriteSize = attachedGameObject.GetComponent<SpriteRenderer>().bounds.size;
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition); ;
-        mousePos.z = 0;
-        Vector3 direction = mousePos - arm.position;
+       
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 direction = mousePos - armTransform.position;
         direction.z = 0;  // Keep the direction in the X-Y plane
 
         // Calculate the rotation needed to point the object at the target
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
+        float angle = Mathf.Clamp(calculateAngleofVector(direction), -50, 90);
+        armTransform.rotation = Quaternion.Euler(0, 0, angle);
 
+    }
 
-        // Apply the rotation to the object
-        angle = Mathf.Clamp(angle, -50, 90);
-        arm.rotation = Quaternion.Euler(0, 0, angle);
+    private float calculateAngleofVector(Vector3 vector)
+    {
+        return  Mathf.Atan2(vector.y, vector.x) * Mathf.Rad2Deg;
+    }
+    void StartRaycast()
+    {
+        Vector3 mousePosition = Input.mousePosition;
 
-        DrawTrajectory();
-
+        Vector3 worldMousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
     }
     void DrawTrajectory()
     {
@@ -114,9 +107,9 @@ public class PlayerAttack : MonoBehaviour
         // }
         // else
         // {
-            // If raycast hits nothing, draw line towards mouse position
-            lineRenderer.SetPosition(0, gunPosition);
-            lineRenderer.SetPosition(1, gunPosition + direction.normalized *0.5f); // Line length when nothing is hit
+        // If raycast hits nothing, draw line towards mouse position
+        lineRenderer.SetPosition(0, gunPosition);
+        lineRenderer.SetPosition(1, gunPosition + direction.normalized * 0.5f); // Line length when nothing is hit
         // }
     }
 }
