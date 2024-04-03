@@ -39,8 +39,8 @@
      <Compile Include="Assets/Scripts/PlayerMovement.cs" />
      <Compile Include="Assets/DeadRevolver/PixelPrototypePlayerSprites/Demo/Scripts/DemoUIManager.cs" />
      <Compile Include="Assets/Scripts/CharacterController2D.cs" />
-     <Compile Include="Assets/DeadRevolver/PixelPrototypePlayerSprites/Demo/Scripts/[Demo]PlayerPreviewManager.cs" />
      <Compile Include="Assets/Scripts/PlayerAttack.cs" />
+     <Compile Include="Assets/DeadRevolver/PixelPrototypePlayerSprites/Demo/Scripts/[Demo]PlayerPreviewManager.cs" />
      <None Include="Assets/TextMesh Pro/Shaders/TMPro.cginc" />
      <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader" />
